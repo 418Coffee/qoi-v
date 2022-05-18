@@ -10,3 +10,6 @@ vls.log
 
 # Test images
 /qoi_test_images
+
+# Profiling
+profile.txt
