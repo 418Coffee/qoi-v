@@ -85,7 +85,6 @@ pub fn decode(data []u8) ?[]u8 {
 				px[0] = data[p++]
 				px[1] = data[p++]
 				px[2] = data[p++]
-				px[3] = 0xff
 			} else if b1 == qoi_op_rgba {
 				px[0] = data[p++]
 				px[1] = data[p++]
