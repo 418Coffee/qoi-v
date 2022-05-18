@@ -12,7 +12,6 @@ const (
 	qoi_op_rgb      = 0xfe // 11111110
 	qoi_op_rgba     = 0xff // 11111111
 	qoi_mask_2      = 0xc0 // 11000000
-
 	qoi_header_size = 14
 	qoi_magic       = [u8(`q`), `o`, `i`, `f`]
 	qoi_padding     = [u8(0), 0, 0, 0, 0, 0, 0, 1]
@@ -37,27 +36,9 @@ struct Config {
 }
 
 fn (c Config) is_valid() ? {
-	if c.pixels == 0 || c.channels !in [3, 4] || c.colourspace > 1 || c.pixels > qoi_pixels_max {
+	if c.pixels == 0 || c.channels !in [3, 4] || c.colourspace > 1
+		|| c.pixels < qoi_header_size + qoi_padding.len || c.pixels > qoi_pixels_max {
 		return error('invalid configuration')
-	}
-}
-
-fn read_full(mut r io.Reader, mut buf []u8) ? {
-	read_at_least(mut r, mut buf, buf.len) ?
-}
-
-fn read_at_least(mut r io.Reader, mut buf []u8, min int) ? {
-	if min < 0 {
-		return error('min < 0')
-	} else if buf.len < min {
-		return error('buf.len < min')
-	}
-	mut nn := 0
-	for nn < min {
-		nn += r.read(mut buf[nn..]) ?
-	}
-	if nn < min {
-		return error('unexpected eof')
 	}
 }
 
@@ -93,6 +74,7 @@ pub fn decode(data []u8) ?[]u8 {
 	mut res := []u8{cap: px_len}
 	mut index := []Pixel{len: 64}
 	mut px := Pixel([4]u8{init: 0})
+	px[3] = 0xff
 	chunks_len := data.len - qoi_padding.len
 	for px_pos := 0; px_pos < px_len; px_pos += config.channels {
 		if run > 0 {
@@ -215,8 +197,9 @@ pub fn encode(data []u8, config Config) ?[]u8 {
 }
 
 fn write_to_file(filename string, data []u8) ? {
-	mut writer := os.open_file(filename, 'w') ?
-	write_all(data, mut writer) ?
+	mut f := os.create(filename) ?
+	write_all(data, mut f) ?
+	f.close()
 }
 
 fn write_all(data []u8, mut w io.Writer) ? {
@@ -227,13 +210,14 @@ fn write_all(data []u8, mut w io.Writer) ? {
 }
 
 fn main() {
-	mut reader := os.open_file('./qoi_test_images/dice.qoi', 'rb') ?
-	data := io.read_all(io.ReadAllConfig{ read_to_end_of_stream: true, reader: reader }) ?
+	mut f := os.open_file('./qoi_test_images/dice.qoi', 'rb') ?
+	data := io.read_all(io.ReadAllConfig{ reader: f }) ?
+	f.close()
 	decoded := decode(data) ?
+	println(decoded.len)
+	write_to_file('./vcard.dec', decoded) ?
 	config := decode_header(data) ?
-	write_to_file('./v.bin', decoded) ?
 	encoded := encode(decoded, config) ?
-	write_to_file('./vdice.qoi', encoded) ?
+	write_to_file('./vcard.enc', encoded) ?
 	assert data.len == encoded.len
-	assert data[..1000] == encoded[..1000]
 }
