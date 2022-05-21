@@ -13,7 +13,7 @@ jobs:
 
     steps:
      - uses: vlang/setup-v@v1
-        with:
+      with:
           check-latest: true
           architecture: ${{ matrix.os }}
      - uses: actions/checkout@v3
