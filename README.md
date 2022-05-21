@@ -19,7 +19,7 @@ More info at https://qoiformat.org
 ## Installation
 
 ```cmd
-vpm install qoi
+vpm install 418Coffee.qoi
 ```
 
 ## [Documentation](https://github.com/418Coffee/qoi-v/blob/main/docs.md)
