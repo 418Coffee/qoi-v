@@ -22,9 +22,7 @@ More info at https://qoiformat.org
 vpm install qoi
 ```
 
-## Documentation
-
-[vpm]()
+## [Documentation](https://github.com/418Coffee/qoi-v/blob/master/docs.md)
 
 ## Contributing
 
