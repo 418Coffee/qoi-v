@@ -13,6 +13,6 @@ fn test_qoi() {
 }
 
 fn test_invalid_channels() {
-	read("./qoi_logo.qoi", -1) or { exit(0) }
-	panic("expected to fail")
+	read('./qoi_logo.qoi', -1) or { exit(0) }
+	panic('expected to fail')
 }

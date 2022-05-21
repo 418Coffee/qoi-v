@@ -69,10 +69,10 @@ pub fn decode_header(data []u8) ?Config {
 
 // Decode a QOI image from memory.
 pub fn decode(data []u8, channels int) ?[]u8 {
-	// V should optimze this:
+	// V should be able to optimize this:
 	// https://twitter.com/v_language/status/1517099415143690240
-	if !(channels in [0, 3, 4]) {
-		return error("invalid channel")
+	if channels !in [0, 3, 4] {
+		return error('invalid channel')
 	}
 	config := decode_header(data) ?
 	config.is_valid() ?
@@ -216,7 +216,7 @@ pub fn write(filename string, data []u8, config Config) ? {
 // number of channels from the file header is used. If channels is 3 or 4 the
 // output format will be forced into this number of channels.
 pub fn read(filename string, channels int) ?[]u8 {
-	return decode(os.read_bytes(filename) ?, channels) 
+	return decode(os.read_bytes(filename) ?, channels)
 }
 
 fn write_to_file(filename string, data []u8) ? {
