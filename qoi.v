@@ -46,7 +46,7 @@ fn colour_hash(p Pixel) u8 {
 	return p[0] * 3 + p[1] * 5 + p[2] * 7 + p[3] * 11
 }
 
-// Decode a QOI header from memory.
+// decode_header decodes a QOI header from memory.
 pub fn decode_header(data []u8) ?Config {
 	if data.len < qoi.qoi_header_size {
 		return error('data < qoi_header_size')
@@ -67,7 +67,7 @@ pub fn decode_header(data []u8) ?Config {
 	}
 }
 
-// Decode a QOI image from memory.
+// decode decodes a QOI image from memory.
 pub fn decode(data []u8, channels int) ?[]u8 {
 	// V should be able to optimize this:
 	// https://twitter.com/v_language/status/1517099415143690240
@@ -125,7 +125,7 @@ pub fn decode(data []u8, channels int) ?[]u8 {
 	return res
 }
 
-// Encode raw RGB or RGBA pixels into a QOI image in memory.
+// encode encodes raw RGB or RGBA pixels into a QOI image in memory.
 pub fn encode(data []u8, config Config) ?[]u8 {
 	config.is_valid() ?
 	max_size := int(config.pixels) * (config.channels + 1) + qoi.qoi_header_size +
