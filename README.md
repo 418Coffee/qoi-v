@@ -2,7 +2,7 @@
 
 # QOI - The “Quite OK Image Format” for fast, lossless image compression implemented in V
 
-Single-file MIT licensed library in implemented in V
+Single-file MIT licensed library for V
 
 See [qoi.h](https://github.com/phoboslab/qoi/blob/master/qoi.h) for
 the original documentation and format specification.
