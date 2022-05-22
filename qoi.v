@@ -28,7 +28,6 @@ type Operand = u8
 type Pixel = [4]u8
 
 struct Config {
-	pixels      u32
 	width       u32
 	height      u32
 	channels    u8
@@ -36,8 +35,9 @@ struct Config {
 }
 
 fn (c Config) is_valid() ? {
-	if c.pixels == 0 || c.channels !in [3, 4] || c.colourspace > 1
-		|| c.pixels < qoi.qoi_header_size + qoi.qoi_padding.len || c.pixels > qoi.qoi_pixels_max {
+	pixels := c.width * c.height
+	if pixels == 0 || c.channels !in [3, 4] || c.colourspace > 1
+		|| pixels < qoi.qoi_header_size + qoi.qoi_padding.len || pixels > qoi.qoi_pixels_max {
 		return error('invalid configuration')
 	}
 }
@@ -59,7 +59,6 @@ pub fn decode_header(data []u8) ?Config {
 	channels := data[12]
 	colourspace := data[13]
 	return Config{
-		pixels: width * height
 		width: width
 		height: height
 		channels: channels
@@ -67,7 +66,9 @@ pub fn decode_header(data []u8) ?Config {
 	}
 }
 
-// decode decodes a QOI image from memory.
+// decode decodes a QOI image from memory. If channels is 0, the
+// number of channels from the file header is used. If channels is 3 or 4 the
+// output format will be forced into this number of channels.
 pub fn decode(data []u8, channels int) ?[]u8 {
 	// V should be able to optimize this:
 	// https://twitter.com/v_language/status/1517099415143690240
@@ -77,7 +78,7 @@ pub fn decode(data []u8, channels int) ?[]u8 {
 	config := decode_header(data) ?
 	config.is_valid() ?
 	c := if channels != 0 { channels } else { config.channels }
-	px_len := int(config.pixels * config.channels)
+	px_len := int(config.width * config.height * config.channels)
 	mut p, mut run := 14, 0
 	mut res := []u8{cap: px_len}
 	mut index := []Pixel{len: 64}
@@ -125,10 +126,11 @@ pub fn decode(data []u8, channels int) ?[]u8 {
 	return res
 }
 
-// encode encodes raw RGB or RGBA pixels into a QOI image in memory.
+// encode encodes raw RGB or RGBA pixels into a QOI image in memory. The config struct must be filled with the image width, height,
+// number of channels (3 = RGB, 4 = RGBA) and the colourspace.
 pub fn encode(data []u8, config Config) ?[]u8 {
 	config.is_valid() ?
-	max_size := int(config.pixels) * (config.channels + 1) + qoi.qoi_header_size +
+	max_size := int(config.width * config.height) * (config.channels + 1) + qoi.qoi_header_size +
 		qoi.qoi_padding.len
 	mut res := []u8{len: 14, cap: max_size}
 	mut p := 0
@@ -146,7 +148,7 @@ pub fn encode(data []u8, config Config) ?[]u8 {
 	mut px_prev := Pixel([4]u8{init: 0})
 	px_prev[3] = 0xff
 	mut px := px_prev
-	px_len := config.pixels * config.channels
+	px_len := config.width * config.height * config.channels
 	px_end := px_len - config.channels
 	for px_pos := 0; px_pos < px_len; px_pos += config.channels {
 		px[0] = data[px_pos + 0]
