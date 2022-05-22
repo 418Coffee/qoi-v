@@ -1,6 +1,6 @@
-# qoi
+# module qoi
 
-## Contents
+## contents
 
 - [decode_header](#decode_header)
 - [encode](#encode)
@@ -24,7 +24,8 @@ decode_header decodes a QOI header from memory.
 fn encode(data []u8, config Config) ?[]u8
 ```
 
-encode encodes raw RGB or RGBA pixels into a QOI image in memory.
+encode encodes raw RGB or RGBA pixels into a QOI image in memory. The config struct must be filled with the image width, height,
+number of channels (3 = RGB, 4 = RGBA) and the colourspace.
 
 [[Return to contents]](#contents)
 
@@ -56,8 +57,9 @@ number of channels (3 = RGB, 4 = RGBA) and the colourspace.
 fn decode(data []u8, channels int) ?[]u8
 ```
 
-decode decodes a QOI image from memory.
+decode decodes a QOI image from memory. If channels is 0, the number of channels from the file header is used. If channels is 3 or 4 the
+output format will be forced into this number of channels.
 
 [[Return to contents]](#contents)
 
-#### Powered by vdoc. Generated on: 21 May 2022 21:04:46
+#### Powered by vdoc. Generated on: 22 May 2022 10:11:36
