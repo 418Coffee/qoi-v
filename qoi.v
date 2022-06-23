@@ -89,16 +89,24 @@ pub fn decode(data []u8, channels int) ?[]u8 {
 		if run > 0 {
 			run--
 		} else if p < chunks_len {
-			b1 := Operand(data[p++])
+			b1 := Operand(data[p])
+			p++
 			if b1 == qoi.qoi_op_rgb {
-				px[0] = data[p++]
-				px[1] = data[p++]
-				px[2] = data[p++]
+				px[0] = data[p]
+				p++
+				px[1] = data[p]
+				p++
+				px[2] = data[p]
+				p++
 			} else if b1 == qoi.qoi_op_rgba {
-				px[0] = data[p++]
-				px[1] = data[p++]
-				px[2] = data[p++]
-				px[3] = data[p++]
+				px[0] = data[p]
+				p++
+				px[1] = data[p]
+				p++
+				px[2] = data[p]
+				p++
+				px[3] = data[p]
+				p++
 			} else if (b1 & qoi.qoi_mask_2) == qoi.qoi_op_index {
 				px = index[b1]
 			} else if (b1 & qoi.qoi_mask_2) == qoi.qoi_op_diff {
@@ -106,7 +114,8 @@ pub fn decode(data []u8, channels int) ?[]u8 {
 				px[1] += ((b1 >> 2) & 0x03) - 2
 				px[2] += (b1 & 0x03) - 2
 			} else if (b1 & qoi.qoi_mask_2) == qoi.qoi_op_luma {
-				b2 := data[p++]
+				b2 := data[p]
+				p++
 				vg := (b1 & 0x3f) - 32
 				px[0] += vg - 8 + ((b2 >> 4) & 0x0f)
 				px[1] += vg
@@ -133,16 +142,14 @@ pub fn encode(data []u8, config Config) ?[]u8 {
 	max_size := int(config.width * config.height) * (config.channels + 1) + qoi.qoi_header_size +
 		qoi.qoi_padding.len
 	mut res := []u8{len: 14, cap: max_size}
-	mut p := 0
-	res[p++] = qoi.qoi_magic[0]
-	res[p++] = qoi.qoi_magic[1]
-	res[p++] = qoi.qoi_magic[2]
-	res[p++] = qoi.qoi_magic[3]
+	res[0] = qoi.qoi_magic[0]
+	res[1] = qoi.qoi_magic[1]
+	res[2] = qoi.qoi_magic[2]
+	res[3] = qoi.qoi_magic[3]
 	binary.big_endian_put_u32(mut res[4..], config.width)
 	binary.big_endian_put_u32(mut res[8..], config.height)
-	p += 8
-	res[p++] = config.channels
-	res[p++] = config.colourspace
+	res[12] = config.channels
+	res[13] = config.colourspace
 	mut index := []Pixel{len: 64}
 	mut run := u8(0)
 	mut px_prev := Pixel([4]u8{init: 0})
