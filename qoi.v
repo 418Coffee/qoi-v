@@ -75,8 +75,8 @@ pub fn decode(data []u8, channels int) ?[]u8 {
 	if channels !in [0, 3, 4] {
 		return error('invalid channel')
 	}
-	config := decode_header(data) ?
-	config.is_valid() ?
+	config := decode_header(data)?
+	config.is_valid()?
 	c := if channels != 0 { channels } else { config.channels }
 	px_len := int(config.width * config.height * config.channels)
 	mut p, mut run := 14, 0
@@ -138,7 +138,7 @@ pub fn decode(data []u8, channels int) ?[]u8 {
 // encode encodes raw RGB or RGBA pixels into a QOI image in memory. The config struct must be filled with the image width, height,
 // number of channels (3 = RGB, 4 = RGBA) and the colourspace.
 pub fn encode(data []u8, config Config) ?[]u8 {
-	config.is_valid() ?
+	config.is_valid()?
 	max_size := int(config.width * config.height) * (config.channels + 1) + qoi.qoi_header_size +
 		qoi.qoi_padding.len
 	mut res := []u8{len: 14, cap: max_size}
@@ -218,25 +218,25 @@ pub fn encode(data []u8, config Config) ?[]u8 {
 // system. The config struct must be filled with the image width, height,
 // number of channels (3 = RGB, 4 = RGBA) and the colourspace.
 pub fn write(filename string, data []u8, config Config) ? {
-	return write_to_file(filename, encode(data, config) ?)
+	return write_to_file(filename, encode(data, config)?)
 }
 
 // read reads and decodes a QOI image from the file system. If channels is 0, the
 // number of channels from the file header is used. If channels is 3 or 4 the
 // output format will be forced into this number of channels.
 pub fn read(filename string, channels int) ?[]u8 {
-	return decode(os.read_bytes(filename) ?, channels)
+	return decode(os.read_bytes(filename)?, channels)
 }
 
 fn write_to_file(filename string, data []u8) ? {
-	mut f := os.create(filename) ?
-	write_all(data, mut f) ?
+	mut f := os.create(filename)?
+	write_all(data, mut f)?
 	f.close()
 }
 
 fn write_all(data []u8, mut w io.Writer) ? {
 	mut n := 0
 	for n < data.len {
-		n += w.write(data[n..]) ?
+		n += w.write(data[n..])?
 	}
 }
